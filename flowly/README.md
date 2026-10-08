@@ -17,7 +17,9 @@ MertixtanStudios sosyal medya uygulaması — açılış animasyonu, giriş / ka
 | MertixtanStudios | mertozokur@gmail.com |
 | Kaplan10_p2 | — |
 
-Şifreler `app.js` içinde düz metin olarak değil, SHA-256 özeti olarak tutulur. Owner hesapları "OWNER" rozeti görür.
+Şifreler `index.html` içinde düz metin olarak değil, SHA-256 özeti olarak tutulur. Owner hesapları "OWNER" rozeti görür.
+
+Uygulamanın tamamı (HTML, CSS, JS) tek bir `index.html` dosyasındadır.
 
 ## Bilgisayarda çalıştırma
 
@@ -43,7 +45,7 @@ Bilgisayarın yerel IP'sini öğrenin (Windows: `ipconfig` → IPv4 Address, Mac
 2. ```bash
    pkg install python
    termux-setup-storage
-   cd ~/storage/downloads/flowly   # flowly klasörünü Downloads'a çıkarın
+   cd ~/storage/downloads/flowly   # index.html'i Downloads/flowly klasörüne koyun
    python -m http.server 8080
    ```
 3. Chrome'da `http://localhost:8080` açın.
