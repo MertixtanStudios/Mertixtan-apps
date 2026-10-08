@@ -27,7 +27,7 @@ Chrome'da **localhost:8080** adresini aç. Sunucuyu durdurmak için `Ctrl + C`.
 
 Sonraki seferlerde: `cd ~/flowly && python server.py`
 
-> "Address already in use" hatası alırsan eski sunucu açık kalmıştır: `pkill -f server.py` yazıp tekrar başlat.
+> 8080 portu doluysa (ör. eski `python -m http.server` açık kaldıysa) sunucu otomatik olarak 8081, 8082… portunu kullanır ve hangi adresi açman gerektiğini yazar. Eski sunucuları kapatmak için: `pkill -f http.server; pkill -f server.py`
 
 ### Bilgisayar
 

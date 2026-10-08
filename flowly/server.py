@@ -11,6 +11,7 @@ bu cihazda localhost zaten güvenlidir; diğer cihazlar için README'deki HTTPS
 adımlarına bakın (cert.pem + key.pem varsa sunucu otomatik HTTPS açar).
 """
 
+import errno
 import hashlib
 import hmac
 import json
@@ -1220,7 +1221,19 @@ def api_admin_user(h, user, body):
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
     load_db()
-    httpd = ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    httpd = None
+    for candidate in range(port, port + 20):
+        try:
+            httpd = ThreadingHTTPServer(("0.0.0.0", candidate), Handler)
+            break
+        except OSError as e:
+            if e.errno not in (errno.EADDRINUSE, errno.EACCES):
+                raise
+            print(f"Port {candidate} dolu (eski bir sunucu açık kalmış olabilir), {candidate + 1} deneniyor…")
+    if httpd is None:
+        print(f"{port}-{port + 19} arasındaki portların hepsi dolu. Eski sunucuları kapat: pkill -f http.server; pkill -f server.py")
+        sys.exit(1)
+    port = httpd.server_address[1]
     httpd.daemon_threads = True
     cert, key = os.path.join(ROOT, "cert.pem"), os.path.join(ROOT, "key.pem")
     scheme = "http"
