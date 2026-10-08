@@ -36,12 +36,8 @@
     <div class="card">
       <button class="back" data-go="choice" aria-label="Geri">&larr;</button>
       <h2 class="logo rgb-text">Giriş Yap</h2>
-      <button class="btn google" data-google="login">
-        <span class="g-icon">G</span> Google ile giriş yap
-      </button>
-      <div class="divider"><span>veya e-posta ile</span></div>
       <form id="loginForm" autocomplete="on">
-        <label>Ad (veya e-posta)
+        <label>Ad Soyad veya kullanıcı adı
           <input name="name" required autocomplete="username" />
         </label>
         <label>Şifre
@@ -58,10 +54,6 @@
     <div class="card">
       <button class="back" data-go="choice" aria-label="Geri">&larr;</button>
       <h2 class="logo rgb-text">Kayıt Ol</h2>
-      <button class="btn google" data-google="register">
-        <span class="g-icon">G</span> Google hesabı ile hesap oluştur
-      </button>
-      <div class="divider"><span>veya e-posta ile</span></div>
       <form id="registerForm" autocomplete="on">
         <div class="row">
           <label>Ad
@@ -71,9 +63,6 @@
             <input name="lastName" required autocomplete="family-name" />
           </label>
         </div>
-        <label>E-posta
-          <input name="email" type="email" required autocomplete="email" />
-        </label>
         <label>Şifre
           <input name="password" type="password" minlength="6" required autocomplete="new-password" />
         </label>
@@ -83,21 +72,7 @@
     </div>
   </section>
 
-  <!-- 5) E-posta doğrulama -->
-  <section id="verify" class="screen">
-    <div class="card">
-      <button class="back" data-go="choice" aria-label="Geri">&larr;</button>
-      <h2 class="logo rgb-text">E-posta Doğrulama</h2>
-      <p class="muted"><b id="verifyEmail"></b> adresine 6 haneli bir kod gönderdik.</p>
-      <form id="verifyForm">
-        <input name="code" class="code-input" inputmode="numeric" maxlength="6" pattern="\d{6}" placeholder="••••••" required />
-        <button class="btn primary" type="submit">Doğrula</button>
-      </form>
-      <p class="switch"><a href="#" id="resendCode">Kodu tekrar gönder</a></p>
-    </div>
-  </section>
-
-  <!-- 6) Yakında -->
+  <!-- 5) Yakında -->
   <section id="home" class="screen">
     <div class="neon-bg"></div>
     <div class="home-inner">
@@ -108,27 +83,8 @@
     </div>
   </section>
 
-  <!-- Demo Google penceresi -->
-  <dialog id="googleDialog">
-    <form method="dialog" id="googleForm">
-      <h3><span class="g-icon">G</span> Google ile devam et</h3>
-      <p class="muted small">Demo modu: config.js içinde googleClientId tanımlanmadı.</p>
-      <label>Ad Soyad
-        <input name="name" required />
-      </label>
-      <label>Gmail adresi
-        <input name="email" type="email" required />
-      </label>
-      <div class="row">
-        <button class="btn ghost" value="cancel" formnovalidate>İptal</button>
-        <button class="btn primary" value="ok">Devam</button>
-      </div>
-    </form>
-  </dialog>
-
   <div id="toast" role="status" aria-live="polite"></div>
 
-  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
