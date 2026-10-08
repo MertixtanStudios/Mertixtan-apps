@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flowly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700;1,900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 1) Açılış animasyonu -->
+  <section id="intro" class="screen active" aria-label="Flowly açılış">
+    <div class="intro-inner">
+      <h1 class="brand rgb-text">Flowly</h1>
+      <div class="brand-line rgb-bg"></div>
+      <p class="studio">MertixtanStudios</p>
+    </div>
+  </section>
+
+  <!-- 2) Kayıt mı / Giriş mi -->
+  <section id="choice" class="screen">
+    <div class="card">
+      <h2 class="logo rgb-text">Flowly</h2>
+      <p class="question">Kayıt mı olacaksınız, giriş mi yapacaksınız?</p>
+      <div class="stack">
+        <button class="btn primary" data-go="login">Giriş Yap</button>
+        <button class="btn ghost" data-go="register">Kayıt Ol</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3) Giriş -->
+  <section id="login" class="screen">
+    <div class="card">
+      <button class="back" data-go="choice" aria-label="Geri">&larr;</button>
+      <h2 class="logo rgb-text">Giriş Yap</h2>
+      <button class="btn google" data-google="login">
+        <span class="g-icon">G</span> Google ile giriş yap
+      </button>
+      <div class="divider"><span>veya e-posta ile</span></div>
+      <form id="loginForm" autocomplete="on">
+        <label>Ad (veya e-posta)
+          <input name="name" required autocomplete="username" />
+        </label>
+        <label>Şifre
+          <input name="password" type="password" required autocomplete="current-password" />
+        </label>
+        <button class="btn primary" type="submit">Giriş Yap</button>
+      </form>
+      <p class="switch">Hesabın yok mu? <a href="#" data-go="register">Kayıt ol</a></p>
+    </div>
+  </section>
+
+  <!-- 4) Kayıt -->
+  <section id="register" class="screen">
+    <div class="card">
+      <button class="back" data-go="choice" aria-label="Geri">&larr;</button>
+      <h2 class="logo rgb-text">Kayıt Ol</h2>
+      <button class="btn google" data-google="register">
+        <span class="g-icon">G</span> Google hesabı ile hesap oluştur
+      </button>
+      <div class="divider"><span>veya e-posta ile</span></div>
+      <form id="registerForm" autocomplete="on">
+        <div class="row">
+          <label>Ad
+            <input name="firstName" required autocomplete="given-name" />
+          </label>
+          <label>Soyad
+            <input name="lastName" required autocomplete="family-name" />
+          </label>
+        </div>
+        <label>E-posta
+          <input name="email" type="email" required autocomplete="email" />
+        </label>
+        <label>Şifre
+          <input name="password" type="password" minlength="6" required autocomplete="new-password" />
+        </label>
+        <button class="btn primary" type="submit">Kayıt Ol</button>
+      </form>
+      <p class="switch">Zaten hesabın var mı? <a href="#" data-go="login">Giriş yap</a></p>
+    </div>
+  </section>
+
+  <!-- 5) E-posta doğrulama -->
+  <section id="verify" class="screen">
+    <div class="card">
+      <button class="back" data-go="choice" aria-label="Geri">&larr;</button>
+      <h2 class="logo rgb-text">E-posta Doğrulama</h2>
+      <p class="muted"><b id="verifyEmail"></b> adresine 6 haneli bir kod gönderdik.</p>
+      <form id="verifyForm">
+        <input name="code" class="code-input" inputmode="numeric" maxlength="6" pattern="\d{6}" placeholder="••••••" required />
+        <button class="btn primary" type="submit">Doğrula</button>
+      </form>
+      <p class="switch"><a href="#" id="resendCode">Kodu tekrar gönder</a></p>
+    </div>
+  </section>
+
+  <!-- 6) Yakında -->
+  <section id="home" class="screen">
+    <div class="neon-bg"></div>
+    <div class="home-inner">
+      <p class="welcome">Hoş geldin, <span id="userName"></span> <span id="ownerBadge" class="badge" hidden>OWNER</span></p>
+      <h2 class="neon">Yakında Geliyor</h2>
+      <p class="neon-sub">Flowly çok yakında burada. Akışa hazır ol.</p>
+      <button class="btn ghost" id="logout">Çıkış Yap</button>
+    </div>
+  </section>
+
+  <!-- Demo Google penceresi -->
+  <dialog id="googleDialog">
+    <form method="dialog" id="googleForm">
+      <h3><span class="g-icon">G</span> Google ile devam et</h3>
+      <p class="muted small">Demo modu: config.js içinde googleClientId tanımlanmadı.</p>
+      <label>Ad Soyad
+        <input name="name" required />
+      </label>
+      <label>Gmail adresi
+        <input name="email" type="email" required />
+      </label>
+      <div class="row">
+        <button class="btn ghost" value="cancel" formnovalidate>İptal</button>
+        <button class="btn primary" value="ok">Devam</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
