@@ -8,7 +8,15 @@ MertixtanStudios sosyal medya uygulaması — açılış animasyonu, giriş / ka
 2. **"Kayıt mı olacaksınız, giriş mi yapacaksınız?"** seçimi.
 3. **Kayıt:** Ad, soyad, şifre.
 4. **Giriş:** Ad soyad (veya owner kullanıcı adı) + şifre.
-5. **Ana ekran:** Neon "Yakında Geliyor" ekranı.
+5. **Ana sayfa** (açık, ferah, neon tasarım):
+   - **Keşfet:** Video Keşfet, Shorts Keşfet ve Karışık Keşfet modları; kategori filtreleri ve arama.
+   - **Video oynatıcı** ve dikey kaydırmalı **Shorts oynatıcı** (beğen, yorum, destek, paylaş).
+   - **Destekler:** Abonelik yerine destek sistemi; desteklenen üreticiler, destekçilere özel içerikler. *(şimdilik yalnızca tasarım)*
+   - **DM:** Sohbet listesi ve mesaj ekranı. *(şimdilik yalnızca tasarım)*
+   - **Hesap:** Profil, istatistikler, çıkış.
+   - **+ Oluştur:** Video, short, canlı yayın, gönderi seçenekleri. *(yakında)*
+
+Videolar ve shorts şimdilik örnek içeriktir; kapaklar ve oynatıcı görselleri kodla üretilir.
 
 ## Owner hesapları
 
