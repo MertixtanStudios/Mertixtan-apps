@@ -1,9 +1,10 @@
 """Mertixtan yükleyici: tek seferlik, şifreli bağlantılı yükleme sayfası.
 Tabletten paketi (.zip) ya da modeli (.gguf) seç, "Kabul et ve yayınla"ya bas: sunucu canlıya alır, sonra kapanır."""
-import http.server, os, secrets, shutil, ssl, subprocess, sys, zipfile, socket, threading, urllib.request
+import http.server, os, secrets, shutil, signal, ssl, subprocess, sys, time, zipfile, socket, threading, urllib.request
 
 PORT = int(os.environ.get("PORT", "8099"))
-JETON = secrets.token_urlsafe(16)
+JETON = "".join(secrets.choice("abcdefghjkmnpqrstuvwxyz23456789") for _ in range(20))
+PIDDOSYA = "/run/mertixtan-yukleyici.pid"
 ALAN = os.environ.get("ALAN", "mertixtanstudios.com")
 SERT = f"/etc/letsencrypt/live/{ALAN}"
 SURE = 30 * 60  # kullanılmazsa 30 dakikada kendini kapatır
@@ -31,7 +32,10 @@ class Yukleyici(http.server.BaseHTTPRequestHandler):
 
     def _izinli(self):
         if not secrets.compare_digest(self.path.strip("/").encode(), JETON.encode()):
-            self.send_error(404); return False
+            g = ("<meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><body style='font-family:system-ui;background:#0f172a;color:#e2e8f0;padding:24px'>"
+                 "<h2>Bu bağlantı geçersiz</h2><p>Eski ya da yanlış yazılmış bir yükleyici bağlantısı. Terminalde komutu çalıştırdıktan sonra <b>en son çıkan</b> bağlantıyı aç.</p>").encode()
+            self.send_response(404); self.send_header("Content-Type", "text/html; charset=utf-8"); self.send_header("Content-Length", str(len(g))); self.end_headers(); self.wfile.write(g)
+            return False
         return True
 
     def do_GET(self):
@@ -95,7 +99,18 @@ if __name__ == "__main__":
     if os.geteuid() != 0: sys.exit("root olarak çalıştır (sudo).")
     ufw = shutil.which("ufw") and "Status: active" in subprocess.run(["ufw", "status"], capture_output=True, text=True).stdout
     if ufw: subprocess.run(["ufw", "allow", f"{PORT}/tcp"], capture_output=True)
-    s = http.server.ThreadingHTTPServer(("0.0.0.0", PORT), Yukleyici)
+    try:  # önceki çalıştırmadan kalan yükleyici varsa kapat
+        eski = int(open(PIDDOSYA).read().strip())
+        if eski != os.getpid(): os.kill(eski, signal.SIGTERM); time.sleep(1); print("  (açık kalan eski yükleyici kapatıldı)")
+    except (OSError, ValueError): pass
+    for deneme in range(10):
+        try: s = http.server.ThreadingHTTPServer(("0.0.0.0", PORT), Yukleyici); break
+        except OSError:
+            if deneme == 0:
+                subprocess.run(["fuser", "-k", f"{PORT}/tcp"], capture_output=True)  # pid dosyası olmayan eski sürüm
+            time.sleep(1)
+    else: sys.exit(f"{PORT} portu başka bir program tarafından kullanılıyor. Şunu çalıştırıp tekrar dene: sudo fuser -k {PORT}/tcp")
+    with open(PIDDOSYA, "w") as f: f.write(str(os.getpid()))
     if os.path.exists(SERT + "/fullchain.pem"):  # alan adının sertifikası varsa bağlantı şifreli olsun
         b = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER); b.minimum_version = ssl.TLSVersion.TLSv1_2
         b.load_cert_chain(SERT + "/fullchain.pem", SERT + "/privkey.pem")
@@ -111,4 +126,6 @@ if __name__ == "__main__":
           f"  (Dosyayı yükleyince ya da 30 dakika kullanılmazsa kendiliğinden kapanır. İptal: Ctrl+C)\n", flush=True)
     try: s.serve_forever()
     except KeyboardInterrupt: pass
+    try: os.remove(PIDDOSYA)
+    except OSError: pass
     if ufw: subprocess.run(["ufw", "delete", "allow", f"{PORT}/tcp"], capture_output=True)
