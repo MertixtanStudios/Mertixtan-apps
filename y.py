@@ -57,7 +57,7 @@ class Yukleyici(http.server.BaseHTTPRequestHandler):
         yaz("<meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><body style='font-family:system-ui;background:#0f172a;color:#e2e8f0;padding:16px'><h2>Kuruluyor</h2><pre style='white-space:pre-wrap'>")
         yaz(f"{ad} alındı ({len(veri) / 1048576:.1f} MB)\n")
         try:
-            os.makedirs(KLASOR, exist_ok=True); os.chmod(KLASOR, 0o700)
+            os.makedirs(KLASOR, exist_ok=True); os.chmod(KLASOR, 0o755)  # hesap servisi /opt/mertixtan/hesap içinden okur; klasör kapanmamalı
             if ad.lower().endswith(".gguf"):
                 os.makedirs("/opt/mimo", exist_ok=True)
                 with open("/opt/mimo/mimo.gguf", "wb") as f: f.write(veri)
@@ -67,9 +67,9 @@ class Yukleyici(http.server.BaseHTTPRequestHandler):
                 yaz("Yeni MIMO modeli yüklendi ve yeniden başlatıldı.\n" if r.returncode == 0 else f"Model kaydedildi ama MIMO başlatılamadı: {r.stderr}\nÖnce paketi (.zip) yükle.\n")
             elif ad.lower().endswith(".zip"):
                 hedef = os.path.join(KLASOR, "paket")
-                shutil.rmtree(hedef, ignore_errors=True); os.makedirs(hedef)
+                shutil.rmtree(hedef, ignore_errors=True); os.makedirs(hedef, mode=0o700)
                 zp = os.path.join(KLASOR, "son_paket.zip")
-                with open(zp, "wb") as f: f.write(veri)
+                with open(os.open(zp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "wb") as f: f.write(veri)
                 with zipfile.ZipFile(zp) as z:
                     for u in z.namelist():  # zip içinden klasör dışına yazma girişimlerini engelle
                         if u.startswith("/") or ".." in u.split("/"): raise ValueError("güvensiz dosya yolu: " + u)
