@@ -61,6 +61,7 @@ class Yukleyici(http.server.BaseHTTPRequestHandler):
             if ad.lower().endswith(".gguf"):
                 os.makedirs("/opt/mimo", exist_ok=True)
                 with open("/opt/mimo/mimo.gguf", "wb") as f: f.write(veri)
+                with open("/opt/mimo/model_adi", "w") as f: f.write("ozel")  # kurulum bu modeli değiştirmesin
                 try: shutil.chown("/opt/mimo/mimo.gguf", "mimo", "mimo")
                 except (LookupError, OSError): pass
                 r = subprocess.run(["systemctl", "restart", "mimo"], capture_output=True, text=True)
