@@ -1,9 +1,12 @@
 """Mertixtan yükleyici: tek seferlik, şifreli bağlantılı yükleme sayfası.
 Tabletten paketi (.zip) ya da modeli (.gguf) seç, "Kabul et ve yayınla"ya bas: sunucu canlıya alır, sonra kapanır."""
-import http.server, os, secrets, shutil, subprocess, sys, zipfile, socket, threading, urllib.request
+import http.server, os, secrets, shutil, ssl, subprocess, sys, zipfile, socket, threading, urllib.request
 
 PORT = int(os.environ.get("PORT", "8099"))
-JETON = secrets.token_urlsafe(9)
+JETON = secrets.token_urlsafe(16)
+ALAN = os.environ.get("ALAN", "mertixtanstudios.com")
+SERT = f"/etc/letsencrypt/live/{ALAN}"
+SURE = 30 * 60  # kullanılmazsa 30 dakikada kendini kapatır
 KLASOR = "/opt/mertixtan"
 EN_COK = 2 * 1024 ** 3  # 2 GB
 
@@ -27,7 +30,7 @@ class Yukleyici(http.server.BaseHTTPRequestHandler):
     def log_message(self, *a): pass
 
     def _izinli(self):
-        if self.path.strip("/") != JETON:
+        if not secrets.compare_digest(self.path.strip("/").encode(), JETON.encode()):
             self.send_error(404); return False
         return True
 
@@ -38,7 +41,8 @@ class Yukleyici(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         if not self._izinli(): return
-        n = int(self.headers.get("Content-Length", 0))
+        try: n = int(self.headers.get("Content-Length", 0))
+        except ValueError: n = -1
         tur = self.headers.get("Content-Type", "")
         if n <= 0 or n > EN_COK or "boundary=" not in tur:
             self.send_error(400, "Dosya yok ya da çok büyük"); return
@@ -53,7 +57,7 @@ class Yukleyici(http.server.BaseHTTPRequestHandler):
         yaz("<meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><body style='font-family:system-ui;background:#0f172a;color:#e2e8f0;padding:16px'><h2>Kuruluyor</h2><pre style='white-space:pre-wrap'>")
         yaz(f"{ad} alındı ({len(veri) / 1048576:.1f} MB)\n")
         try:
-            os.makedirs(KLASOR, exist_ok=True)
+            os.makedirs(KLASOR, exist_ok=True); os.chmod(KLASOR, 0o700)
             if ad.lower().endswith(".gguf"):
                 os.makedirs("/opt/mimo", exist_ok=True)
                 with open("/opt/mimo/mimo.gguf", "wb") as f: f.write(veri)
@@ -91,7 +95,15 @@ if __name__ == "__main__":
     ufw = shutil.which("ufw") and "Status: active" in subprocess.run(["ufw", "status"], capture_output=True, text=True).stdout
     if ufw: subprocess.run(["ufw", "allow", f"{PORT}/tcp"], capture_output=True)
     s = http.server.ThreadingHTTPServer(("0.0.0.0", PORT), Yukleyici)
-    print(f"\n  Tabletinde bu bağlantıyı aç:\n\n    http://{ip()}:{PORT}/{JETON}\n\n  (Dosyayı yükleyince kendiliğinden kapanır. İptal: Ctrl+C)\n", flush=True)
+    if os.path.exists(SERT + "/fullchain.pem"):  # alan adının sertifikası varsa bağlantı şifreli olsun
+        b = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER); b.minimum_version = ssl.TLSVersion.TLSv1_2
+        b.load_cert_chain(SERT + "/fullchain.pem", SERT + "/privkey.pem")
+        s.socket = b.wrap_socket(s.socket, server_side=True, do_handshake_on_connect=False)  # el sıkışma iş parçacığında olsun
+        adres = f"https://{ALAN}:{PORT}/{JETON}"
+    else:
+        adres = f"http://{ip()}:{PORT}/{JETON}"
+    zaman = threading.Timer(SURE, s.shutdown); zaman.daemon = True; zaman.start()
+    print(f"\n  Tabletinde bu bağlantıyı aç:\n\n    {adres}\n\n  (Dosyayı yükleyince ya da 30 dakika kullanılmazsa kendiliğinden kapanır. İptal: Ctrl+C)\n", flush=True)
     try: s.serve_forever()
     except KeyboardInterrupt: pass
     if ufw: subprocess.run(["ufw", "delete", "allow", f"{PORT}/tcp"], capture_output=True)
