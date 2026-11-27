@@ -104,7 +104,11 @@ if __name__ == "__main__":
     else:
         adres = f"http://{ip()}:{PORT}/{JETON}"
     zaman = threading.Timer(SURE, s.shutdown); zaman.daemon = True; zaman.start()
-    print(f"\n  Tabletinde bu bağlantıyı aç:\n\n    {adres}\n\n  (Dosyayı yükleyince ya da 30 dakika kullanılmazsa kendiliğinden kapanır. İptal: Ctrl+C)\n", flush=True)
+    import base64
+    kopya = "\033]52;c;" + base64.b64encode(adres.encode()).decode() + "\a"   # terminal destekliyorsa panoya kopyalar (OSC 52)
+    bag = f"\033]8;;{adres}\033\\{adres}\033]8;;\033\\"                   # dokunulabilir bağlantı (OSC 8)
+    print(f"{kopya}\n  Tabletinde bu bağlantıyı aç (dokun ya da panodan yapıştır):\n\n    {bag}\n\n"
+          f"  (Dosyayı yükleyince ya da 30 dakika kullanılmazsa kendiliğinden kapanır. İptal: Ctrl+C)\n", flush=True)
     try: s.serve_forever()
     except KeyboardInterrupt: pass
     if ufw: subprocess.run(["ufw", "delete", "allow", f"{PORT}/tcp"], capture_output=True)
